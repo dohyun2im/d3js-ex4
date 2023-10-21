@@ -20,6 +20,7 @@ import { useCallback, useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { useDropzone } from "react-dropzone";
 import * as XLSX from "xlsx";
+import GoogleAds from "./GoogleAds";
 
 const DropZoneContainer = styled("div")`
     width: 100%;
@@ -71,165 +72,129 @@ export default function Home() {
     });
 
     return (
-        <SnackbarProvider maxSnack={3}>
-            <Box sx={{ flexGrow: 1 }}>
-                <AppBar position="static">
-                    <Toolbar sx={{ background: teal[500] }}>
-                        <IconButton size="large" edge="start" color="inherit">
-                            <ChangeCircle fontSize="large" />
-                        </IconButton>
-                        <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: "bold" }}>
-                            Excel To JSON Array
-                        </Typography>
-                        <Tooltip title="Github" arrow>
-                            <a href="https://github.com/dohyun2im" target="_blank" rel="noopener noreferrer">
-                                <Avatar alt="dohyun" src="./favicon.ico" sx={{ mr: 0.42 }} />
-                            </a>
-                        </Tooltip>
-                    </Toolbar>
-                </AppBar>
-            </Box>
-            <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                sx={{
-                    position: "relative",
-                    height: "70vh",
-                    border: "2px dashed #eee",
-                    m: 2,
-                    mt: 7,
-                    borderRadius: "8px",
-                    overflow: "hidden",
-                }}>
-                <DropZoneContainer {...getRootProps({ className: "dropzone" })}>
-                    <input {...getInputProps()} />
-                    {!_.isEmpty(data) ? (
-                        <>
-                            <Box
-                                sx={{
-                                    width: "100%",
-                                    height: "100%",
-                                    pl: 4,
-                                    overflow: "auto",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    justifyContent: "center",
-                                    backgroundColor: "transparent",
-                                }}>
-                                <Typography variant="caption" fontWeight={600}>
-                                    [
-                                </Typography>
-                                {data?.map((d: string[], i) => (
-                                    <Typography
-                                        key={i}
-                                        whiteSpace="nowrap"
-                                        fontWeight={600}
-                                        sx={{ px: 4 }}
-                                        variant="caption">
-                                        {`[ ${d.join(", ")} ]`}
-                                    </Typography>
-                                ))}
-                                <Typography fontWeight={600} variant="caption">
-                                    ]
-                                </Typography>
-                            </Box>
-                            <Tooltip title="Copy" arrow placement="top">
+        <>
+            <GoogleAds />
+            <SnackbarProvider maxSnack={3}>
+                <Box sx={{ flexGrow: 1 }}>
+                    <AppBar position="static">
+                        <Toolbar sx={{ background: teal[500] }}>
+                            <IconButton size="large" edge="start" color="inherit">
+                                <ChangeCircle fontSize="large" />
+                            </IconButton>
+                            <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: "bold" }}>
+                                Excel To JSON Array
+                            </Typography>
+                            <Tooltip title="Github" arrow>
+                                <a href="https://github.com/dohyun2im" target="_blank" rel="noopener noreferrer">
+                                    <Avatar alt="dohyun" src="./favicon.ico" sx={{ mr: 0.42 }} />
+                                </a>
+                            </Tooltip>
+                        </Toolbar>
+                    </AppBar>
+                </Box>
+                <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    sx={{
+                        position: "relative",
+                        height: "70vh",
+                        border: "2px dashed #eee",
+                        m: 2,
+                        mt: 7,
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                    }}>
+                    <DropZoneContainer {...getRootProps({ className: "dropzone" })}>
+                        <input {...getInputProps()} />
+                        {!_.isEmpty(data) ? (
+                            <>
                                 <Box
                                     sx={{
-                                        position: "absolute",
-                                        top: 10,
-                                        right: 100,
+                                        width: "100%",
+                                        height: "100%",
+                                        pl: 4,
+                                        overflow: "auto",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "center",
+                                        backgroundColor: "transparent",
                                     }}>
-                                    <CopyToClipboard
-                                        text={`[\n\t${data
-                                            .map((subArray, index, array) => {
-                                                const isLast = index === array.length - 1;
-                                                const subArrayStr = `[${subArray.join(", ")}]`;
-                                                return isLast ? subArrayStr : subArrayStr + ",\n\t";
-                                            })
-                                            .join("")}\n]`}
-                                        onCopy={() =>
-                                            enqueueSnackbar("Copied on your clipboard", {
-                                                variant: "success",
-                                            })
-                                        }>
-                                        <IconButton
-                                            sx={{
-                                                background: "#fff",
-                                                "&:hover": { background: "#fff", opacity: 0.7 },
-                                            }}>
-                                            <CopyAll htmlColor={teal[500]} />
-                                        </IconButton>
-                                    </CopyToClipboard>
+                                    <Typography variant="caption" fontWeight={600}>
+                                        [
+                                    </Typography>
+                                    {data?.map((d: string[], i) => (
+                                        <Typography
+                                            key={i}
+                                            whiteSpace="nowrap"
+                                            fontWeight={600}
+                                            sx={{ px: 4 }}
+                                            variant="caption">
+                                            {`[ ${d.join(", ")} ]`}
+                                        </Typography>
+                                    ))}
+                                    <Typography fontWeight={600} variant="caption">
+                                        ]
+                                    </Typography>
                                 </Box>
-                            </Tooltip>
-                            <Tooltip title="Upload" arrow placement="top">
-                                <IconButton
-                                    onClick={open}
-                                    sx={{
-                                        position: "absolute",
-                                        top: 10,
-                                        right: 55,
-                                        background: "#fff",
-                                        "&:hover": { background: "#fff", opacity: 0.7 },
-                                    }}>
-                                    <Upload />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Delete" arrow placement="top">
-                                <IconButton
-                                    onClick={() => setData([])}
-                                    sx={{
-                                        position: "absolute",
-                                        top: 10,
-                                        right: 10,
-                                        background: "#fff",
-                                        "&:hover": { background: "#fff", opacity: 0.7 },
-                                    }}>
-                                    <Delete htmlColor={red[500]} />
-                                </IconButton>
-                            </Tooltip>
-                        </>
-                    ) : isDragAccept ? (
-                        <Box
-                            display="flex"
-                            flexDirection="column"
-                            justifyContent="center"
-                            alignItems="center"
-                            sx={{
-                                width: "100%",
-                                height: "100%",
-                                background: "repeating-linear-gradient(50deg, #fff, #fff 30px, #eee 30px, #eee 60px)",
-                            }}
-                            {...getRootProps({ className: "dropzone" })}>
-                            <CloudDownloadTwoTone
-                                sx={{
-                                    color: "#5cb9fb",
-                                    width: 150,
-                                    height: 150,
-                                }}
-                            />
-
-                            <Typography
-                                variant="subtitle2"
-                                display="flex"
-                                alignItems="center"
-                                sx={{
-                                    padding: "6px 30px",
-                                    borderRadius: 1,
-                                    color: "#666",
-                                    backgroundColor: "#fff",
-                                    border: "2.5px dashed #5cb9fb",
-                                    opacity: 0.6,
-                                }}>
-                                <AddPhotoAlternateRounded sx={{ mr: 1, mb: 0.5 }} />
-                                Put the file in the zone !
-                            </Typography>
-                        </Box>
-                    ) : (
-                        !isDragAccept &&
-                        !isDragActive && (
+                                <Tooltip title="Copy" arrow placement="top">
+                                    <Box
+                                        sx={{
+                                            position: "absolute",
+                                            top: 10,
+                                            right: 100,
+                                        }}>
+                                        <CopyToClipboard
+                                            text={`[\n\t${data
+                                                .map((subArray, index, array) => {
+                                                    const isLast = index === array.length - 1;
+                                                    const subArrayStr = `[${subArray.join(", ")}]`;
+                                                    return isLast ? subArrayStr : subArrayStr + ",\n\t";
+                                                })
+                                                .join("")}\n]`}
+                                            onCopy={() =>
+                                                enqueueSnackbar("Copied on your clipboard", {
+                                                    variant: "success",
+                                                })
+                                            }>
+                                            <IconButton
+                                                sx={{
+                                                    background: "#fff",
+                                                    "&:hover": { background: "#fff", opacity: 0.7 },
+                                                }}>
+                                                <CopyAll htmlColor={teal[500]} />
+                                            </IconButton>
+                                        </CopyToClipboard>
+                                    </Box>
+                                </Tooltip>
+                                <Tooltip title="Upload" arrow placement="top">
+                                    <IconButton
+                                        onClick={open}
+                                        sx={{
+                                            position: "absolute",
+                                            top: 10,
+                                            right: 55,
+                                            background: "#fff",
+                                            "&:hover": { background: "#fff", opacity: 0.7 },
+                                        }}>
+                                        <Upload />
+                                    </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Delete" arrow placement="top">
+                                    <IconButton
+                                        onClick={() => setData([])}
+                                        sx={{
+                                            position: "absolute",
+                                            top: 10,
+                                            right: 10,
+                                            background: "#fff",
+                                            "&:hover": { background: "#fff", opacity: 0.7 },
+                                        }}>
+                                        <Delete htmlColor={red[500]} />
+                                    </IconButton>
+                                </Tooltip>
+                            </>
+                        ) : isDragAccept ? (
                             <Box
                                 display="flex"
                                 flexDirection="column"
@@ -238,40 +203,80 @@ export default function Home() {
                                 sx={{
                                     width: "100%",
                                     height: "100%",
-                                    ":hover": {
-                                        transform: "scale(1.1)",
-                                    },
-                                }}>
-                                <Avatar sx={{ p: 5, mb: 2 }}>
-                                    <FileUploadRounded
-                                        sx={{
-                                            width: 100,
-                                            height: 100,
-                                        }}
-                                    />
-                                </Avatar>
+                                    background:
+                                        "repeating-linear-gradient(50deg, #fff, #fff 30px, #eee 30px, #eee 60px)",
+                                }}
+                                {...getRootProps({ className: "dropzone" })}>
+                                <CloudDownloadTwoTone
+                                    sx={{
+                                        color: "#5cb9fb",
+                                        width: 150,
+                                        height: 150,
+                                    }}
+                                />
 
                                 <Typography
                                     variant="subtitle2"
                                     display="flex"
                                     alignItems="center"
                                     sx={{
-                                        padding: "8px 16px",
+                                        padding: "6px 30px",
                                         borderRadius: 1,
-                                        color: "#666666",
-                                        backgroundColor: "#eee",
+                                        color: "#666",
+                                        backgroundColor: "#fff",
+                                        border: "2.5px dashed #5cb9fb",
+                                        opacity: 0.6,
                                     }}>
-                                    <Mouse sx={{ fontSize: 16 }} />
-                                    Click or
-                                    <PanTool sx={{ fontSize: 16, ml: 1, mr: 0.5 }} />
-                                    Drag to upload your Excel file (.xlsx).
+                                    <AddPhotoAlternateRounded sx={{ mr: 1, mb: 0.5 }} />
+                                    Put the file in the zone !
                                 </Typography>
                             </Box>
-                        )
-                    )}
-                </DropZoneContainer>
-            </Box>
-            <Box sx={{ px: 4 }}>{error && <Alert severity="error">{error}</Alert>}</Box>
-        </SnackbarProvider>
+                        ) : (
+                            !isDragAccept &&
+                            !isDragActive && (
+                                <Box
+                                    display="flex"
+                                    flexDirection="column"
+                                    justifyContent="center"
+                                    alignItems="center"
+                                    sx={{
+                                        width: "100%",
+                                        height: "100%",
+                                        ":hover": {
+                                            transform: "scale(1.1)",
+                                        },
+                                    }}>
+                                    <Avatar sx={{ p: 5, mb: 2 }}>
+                                        <FileUploadRounded
+                                            sx={{
+                                                width: 100,
+                                                height: 100,
+                                            }}
+                                        />
+                                    </Avatar>
+
+                                    <Typography
+                                        variant="subtitle2"
+                                        display="flex"
+                                        alignItems="center"
+                                        sx={{
+                                            padding: "8px 16px",
+                                            borderRadius: 1,
+                                            color: "#666666",
+                                            backgroundColor: "#eee",
+                                        }}>
+                                        <Mouse sx={{ fontSize: 16 }} />
+                                        Click or
+                                        <PanTool sx={{ fontSize: 16, ml: 1, mr: 0.5 }} />
+                                        Drag to upload your Excel file (.xlsx).
+                                    </Typography>
+                                </Box>
+                            )
+                        )}
+                    </DropZoneContainer>
+                </Box>
+                <Box sx={{ px: 4 }}>{error && <Alert severity="error">{error}</Alert>}</Box>
+            </SnackbarProvider>
+        </>
     );
 }
