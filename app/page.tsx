@@ -50,14 +50,18 @@ export default function Home() {
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            const data = new Uint8Array(e.target?.result as ArrayBuffer);
-            const workbook = XLSX.read(data, { type: "array", cellText: false });
+            const fileData = new Uint8Array(e.target?.result as ArrayBuffer);
+            const workbook = XLSX.read(fileData, { type: "array", cellText: false });
             const worksheet = workbook.Sheets[workbook.SheetNames[0]];
             const jsonData: string[][] = XLSX.utils.sheet_to_json(worksheet, {
                 header: 1,
             });
 
             const arr = jsonData.filter((d: string[]) => d.length > 0);
+            if (_.isEmpty(arr)) {
+                setError("No data in the file.");
+                return;
+            }
             setData(arr);
         };
         reader.readAsArrayBuffer(file);
@@ -89,18 +93,25 @@ export default function Home() {
                     </Toolbar>
                 </AppBar>
             </Box>
+            <Box sx={{ p: 2 }}>
+                {error && (
+                    <Alert severity="error" onClose={() => setError("")}>
+                        {error}
+                    </Alert>
+                )}
+            </Box>
             <Box
                 display="flex"
                 justifyContent="center"
                 alignItems="center"
                 sx={{
                     position: "relative",
-                    height: "70vh",
+                    height: !_.isEmpty(data) ? 510 : 550,
                     border: "2px dashed #eee",
-                    m: 2,
-                    mt: 7,
-                    p: 4,
+                    mx: 2,
+                    p: !_.isEmpty(data) ? "20px" : undefined,
                     borderRadius: "8px",
+                    overflow: "hidden",
                 }}>
                 <DropZoneContainer {...getRootProps({ className: "dropzone" })}>
                     <input {...getInputProps()} />
@@ -110,11 +121,9 @@ export default function Home() {
                                 sx={{
                                     width: "100%",
                                     height: "100%",
-                                    overflowX: "auto",
+                                    overflow: "auto",
                                     display: "flex",
                                     flexDirection: "column",
-                                    justifyContent: "center",
-                                    backgroundColor: "transparent",
                                 }}>
                                 <Typography fontWeight={600}>[</Typography>
                                 {data?.map((d: string[], i) => (
@@ -151,13 +160,14 @@ export default function Home() {
                                         <IconButton
                                             sx={{
                                                 background: "#fff",
-                                                "&:hover": { background: "#fff", opacity: 0.7 },
+                                                opacity: 0.75,
+                                                "&:hover": { background: "#fff", opacity: 1 },
                                                 "@keyframes shake": {
                                                     "0%": {
                                                         transform: "translate(0, 0)",
                                                     },
                                                     "50%": {
-                                                        transform: "translate(0, -15px)",
+                                                        transform: "translate(0, -12px)",
                                                     },
                                                     "100%": {
                                                         transform: "translate(0, 0)",
@@ -178,7 +188,8 @@ export default function Home() {
                                         top: 10,
                                         right: 55,
                                         background: "#fff",
-                                        "&:hover": { background: "#fff", opacity: 0.7 },
+                                        opacity: 0.75,
+                                        "&:hover": { background: "#fff", opacity: 1 },
                                     }}>
                                     <Upload />
                                 </IconButton>
@@ -191,7 +202,8 @@ export default function Home() {
                                         top: 10,
                                         right: 10,
                                         background: "#fff",
-                                        "&:hover": { background: "#fff", opacity: 0.7 },
+                                        opacity: 0.75,
+                                        "&:hover": { background: "#fff", opacity: 1 },
                                     }}>
                                     <Delete htmlColor={red[500]} />
                                 </IconButton>
@@ -245,7 +257,7 @@ export default function Home() {
                                     width: "100%",
                                     height: "100%",
                                     ":hover": {
-                                        transform: "scale(1.1)",
+                                        transform: "scale(1.2)",
                                     },
                                 }}>
                                 <Avatar sx={{ p: 5, mb: 2 }}>
@@ -269,15 +281,14 @@ export default function Home() {
                                     }}>
                                     <Mouse sx={{ fontSize: 16 }} />
                                     Click or
-                                    <PanTool sx={{ fontSize: 16, ml: 1, mr: 0.5 }} />
-                                    Drag to upload your Excel file (.xlsx).
+                                    <PanTool sx={{ fontSize: 16, ml: 0.5, mr: 0.5 }} />
+                                    drag n drop to upload your excel file. (.xlsx)
                                 </Typography>
                             </Box>
                         )
                     )}
                 </DropZoneContainer>
             </Box>
-            <Box sx={{ px: 4 }}>{error && <Alert severity="error">{error}</Alert>}</Box>
         </SnackbarProvider>
     );
 }
