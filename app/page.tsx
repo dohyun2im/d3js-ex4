@@ -20,7 +20,8 @@ import { useCallback, useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { useDropzone } from "react-dropzone";
 import * as XLSX from "xlsx";
-import GoogleAds from "./GoogleAds";
+import dynamic from "next/dynamic";
+const GoogleAds = dynamic(() => import("./GoogleAds"), { ssr: false });
 
 const DropZoneContainer = styled("div")`
     width: 100%;
@@ -113,7 +114,7 @@ export default function Home() {
                                     sx={{
                                         width: "100%",
                                         height: "100%",
-                                        pl: 4,
+                                        px: 4,
                                         overflow: "auto",
                                         display: "flex",
                                         flexDirection: "column",
