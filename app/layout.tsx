@@ -17,14 +17,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
         <>
             <html lang="en">
-                <Head>
-                    <Script
-                        async
-                        strategy="beforeInteractive"
-                        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4280450396073454"
-                        crossOrigin="anonymous"
-                    />
-                </Head>
+                <Script
+                    async
+                    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4280450396073454"
+                    crossOrigin="anonymous"
+                />
                 <body className={inter.className}>{children}</body>
             </html>
         </>
