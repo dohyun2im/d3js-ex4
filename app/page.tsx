@@ -104,7 +104,7 @@ export default function Home() {
                         m: 2,
                         mt: 7,
                         borderRadius: "8px",
-                        overflow: "hidden",
+                        overflowX: "hidden",
                     }}>
                     <DropZoneContainer {...getRootProps({ className: "dropzone" })}>
                         <input {...getInputProps()} />
@@ -114,8 +114,8 @@ export default function Home() {
                                     sx={{
                                         width: "100%",
                                         height: "100%",
-                                        px: 4,
-                                        overflow: "auto",
+                                        mx: 4,
+                                        overflowX: "auto",
                                         display: "flex",
                                         flexDirection: "column",
                                         justifyContent: "center",
@@ -129,7 +129,7 @@ export default function Home() {
                                             key={i}
                                             whiteSpace="nowrap"
                                             fontWeight={600}
-                                            sx={{ px: 4 }}
+                                            sx={{ mx: 4 }}
                                             variant="caption">
                                             {`[ ${d.join(", ")} ]`}
                                         </Typography>

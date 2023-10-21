@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Favicon from "/public/favicon.ico";
 import Head from "next/head";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,10 +18,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <>
             <html lang="en">
                 <Head>
-                    <script
+                    <Script
                         async
+                        strategy="beforeInteractive"
                         src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4280450396073454"
-                        crossOrigin="anonymous"></script>
+                        crossOrigin="anonymous"
+                    />
                 </Head>
                 <body className={inter.className}>{children}</body>
             </html>

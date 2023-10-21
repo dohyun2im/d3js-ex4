@@ -4,13 +4,34 @@ import React, { useEffect } from "react";
 
 const GoogleAds = () => {
     useEffect(() => {
-        try {
-            const adsbygoogle = (window as any).adsbygoogle;
-            adsbygoogle?.push?.({});
-        } catch (e) {
-            console.error(e);
+        const checkAdsbygoogle = () => {
+            if ((window as any).adsbygoogle && (window as any).adsbygoogle.push) {
+                (window as any).adsbygoogle.push({});
+            } else {
+                console.warn("adsbygoogle.push is not available.");
+            }
+        };
+
+        let interval: any;
+        const timeout = 10000;
+
+        if ((window as any).adsbygoogle && (window as any).adsbygoogle.push) {
+            checkAdsbygoogle();
+        } else {
+            interval = setInterval(checkAdsbygoogle, 1000);
         }
+
+        const timeoutId = setTimeout(() => {
+            clearInterval(interval);
+            console.error("Adsense script did not load within the specified timeout.");
+        }, timeout);
+
+        return () => {
+            clearInterval(interval);
+            clearTimeout(timeoutId);
+        };
     }, []);
+
     return (
         <>
             <ins
