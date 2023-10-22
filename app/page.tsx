@@ -106,7 +106,7 @@ export default function Home() {
                 alignItems="center"
                 sx={{
                     position: "relative",
-                    height: !_.isEmpty(data) ? 510 : 550,
+                    height: "80vh",
                     border: "2px dashed #eee",
                     mx: 2,
                     p: !_.isEmpty(data) ? "20px" : undefined,
@@ -230,7 +230,7 @@ export default function Home() {
                             />
 
                             <Typography
-                                variant="subtitle2"
+                                variant="subtitle1"
                                 display="flex"
                                 alignItems="center"
                                 sx={{
@@ -270,7 +270,7 @@ export default function Home() {
                                 </Avatar>
 
                                 <Typography
-                                    variant="subtitle2"
+                                    variant="subtitle1"
                                     display="flex"
                                     alignItems="center"
                                     sx={{
@@ -278,11 +278,14 @@ export default function Home() {
                                         borderRadius: 1,
                                         color: "#666666",
                                         backgroundColor: "#eee",
+                                        mx: 2,
+                                        display: "flex",
+                                        alignItems: "center",
                                     }}>
                                     <Mouse sx={{ fontSize: 16 }} />
                                     Click or
                                     <PanTool sx={{ fontSize: 16, ml: 0.5, mr: 0.5 }} />
-                                    drag n drop to upload your excel file. (.xlsx)
+                                    drag & drop your file.
                                 </Typography>
                             </Box>
                         )
