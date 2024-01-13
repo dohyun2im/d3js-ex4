@@ -1,297 +1,255 @@
 "use client";
 
-import {
-    AddPhotoAlternateRounded,
-    ChangeCircle,
-    CloudDownloadTwoTone,
-    CopyAll,
-    Delete,
-    FileUploadRounded,
-    Mouse,
-    PanTool,
-    Upload,
-} from "@mui/icons-material";
-import { Alert, AppBar, Avatar, Box, IconButton, Toolbar, Tooltip, Typography } from "@mui/material";
-import { red, teal } from "@mui/material/colors";
-import { styled } from "@mui/material/styles";
-import _ from "lodash";
-import { enqueueSnackbar, SnackbarProvider } from "notistack";
-import { useCallback, useState } from "react";
-import CopyToClipboard from "react-copy-to-clipboard";
-import { useDropzone } from "react-dropzone";
-import * as XLSX from "xlsx";
+import { HomeOutlined } from "@mui/icons-material";
+import { Box, Divider, SwipeableDrawer, Tooltip, Typography } from "@mui/material";
+import { green } from "@mui/material/colors";
+import * as d3 from "d3";
+import { useEffect, useRef, useState } from "react";
+import ReactDOMServer from "react-dom/server";
 
-const DropZoneContainer = styled("div")`
-    width: 100%;
-    height: 100%;
-`;
+const data = {
+    name: "Tenant",
+    children: [
+        {
+            name: "Node 1",
+            children: [
+                { name: "Node 1-1" },
+                { name: "Node 1-2" },
+                {
+                    name: "Node 1-3",
+                    children: [
+                        { name: "Node 1-3-1" },
+                        { name: "Node 1-3-2" },
+                        {
+                            name: "Node 1-3-3",
+                            children: [
+                                { name: "Node 1-3-3-1" },
+                                { name: "Node 1-3-3-2" },
+                                {
+                                    name: "Node 1-3-3-3",
+                                    children: [
+                                        { name: "Node 1-3-3-3-1" },
+                                        { name: "Node 1-3-3-3-2" },
+                                        {
+                                            name: "Node 1-3-3-3-3",
+                                            children: [{ name: "Node 1-3-3-3-3-1" }, { name: "Node 1-3-3-3-3-2" }],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            name: "Node 2",
+            children: [
+                { name: "Node 2-1" },
+                { name: "Node 2-2" },
+                {
+                    name: "Node 2-3",
+                    children: [
+                        { name: "Node 2-3-1" },
+                        { name: "Node 2-3-2" },
+                        {
+                            name: "Node 2-3-3",
+                            children: [
+                                { name: "Node 2-3-3-1" },
+                                { name: "Node 2-3-3-2" },
+                                {
+                                    name: "Node 2-3-3-3",
+                                    children: [
+                                        { name: "Node 2-3-3-3-1" },
+                                        { name: "Node 2-3-3-3-2" },
+                                        {
+                                            name: "Node 2-3-3-3-3",
+                                            children: [{ name: "Node 2-3-3-3-3-1" }, { name: "Node 2-3-3-3-3-2" }],
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        },
+        {
+            name: "Node 3",
+            children: [{ name: "Node 3-1" }],
+        },
+        {
+            name: "Node 4",
+        },
+        {
+            name: "Node 5",
+        },
+        {
+            name: "Node 6",
+        },
+        {
+            name: "Node 7",
+        },
+        {
+            name: "Node 8",
+        },
+        {
+            name: "Node 9",
+        },
+    ],
+};
 
 export default function Home() {
-    const [error, setError] = useState<string>("");
-    const [data, setData] = useState<string[][]>([]);
+    const svgRef = useRef<SVGSVGElement | null>(null);
+    const [tooltipOpen, setTooltipOpen] = useState<boolean>(false);
+    const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
+    const [title, setTitle] = useState<string>("");
 
-    const imageOnDrop = useCallback(async (acceptedFiles: File[]) => {
-        setError("");
-        if (_.isEmpty(acceptedFiles)) {
-            setError("Upload only one file.");
-            return;
-        }
+    useEffect(() => {
+        const width = 1350;
 
-        const file = acceptedFiles?.[0];
-        if (file?.size === 0 || _.isEmpty(file)) {
-            setError("The file is missing.");
-            return;
-        }
+        const root = d3.hierarchy(data);
+        const dx = 50;
+        const dy = width / (root.height + 1);
 
-        if (file?.type !== "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") {
-            setError("Must be a file with .xlsx extension.");
-            return;
-        }
+        const tree = d3.tree().nodeSize([dx, dy]);
+        root.sort((a, b) => d3.ascending(a.data.name, b.data.name));
+        tree(root as any);
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const fileData = new Uint8Array(e.target?.result as ArrayBuffer);
-            const workbook = XLSX.read(fileData, { type: "array", cellText: false });
-            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonData: string[][] = XLSX.utils.sheet_to_json(worksheet, {
-                header: 1,
+        let x0 = Infinity;
+        let x1 = -x0;
+        root.each((d: any) => {
+            if (d.x > x1) x1 = d.x;
+            if (d.x < x0) x0 = d.x;
+        });
+
+        const height = x1 - x0 + dx * 2;
+
+        const svg = d3
+            .select(svgRef.current)
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [-dy / 3, x0 - dx, width, height])
+            .attr("style", "min-width: 1400px; max-width: 100%; height: auto; font: 10px sans-serif;");
+
+        svg.append("g")
+            .attr("fill", "none")
+            .attr("stroke", "#555")
+            .attr("stroke-opacity", 0.4)
+            .attr("stroke-width", 1.5)
+            .selectAll()
+            .data(root.links())
+            .join("path")
+            .attr(
+                "d",
+                (d3 as any)
+                    .linkHorizontal()
+                    .x((d: any) => d.y)
+                    .y((d: any) => d.x)
+            );
+
+        const node = svg
+            .append("g")
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-width", 3)
+            .selectAll()
+            .data(root.descendants())
+            .join("g")
+            .attr("transform", (d: any) => `translate(${d.y},${d.x})`);
+
+        const iconHtml = ReactDOMServer.renderToString(<HomeOutlined />);
+
+        node.append("rect")
+            .filter((d: any) => d.data.name !== "Tenant")
+            .attr("width", 100)
+            .attr("height", 30)
+            .attr("x", 0)
+            .attr("y", -15)
+            .attr("rx", 5)
+            .attr("ry", 5)
+            .style("fill", "white")
+            .style("stroke", "#555")
+            .style("stroke-width", 1.5)
+            .style("z-index", 10)
+            .on("mouseover", function (e) {
+                setTooltipOpen(true);
+                setTitle(e.target.__data__.data.name);
+                d3.select(this).style("stroke", green[500]).style("stroke-width", 3);
+            })
+            .on("mouseout", function () {
+                setTooltipOpen(false);
+                d3.select(this).style("stroke", "#555").style("stroke-width", 1.5);
+            })
+            .on("click", function (e) {
+                setDrawerOpen(true);
+                console.log("Node clicked:", e.target.__data__.data);
             });
 
-            const arr = jsonData.filter((d: string[]) => d.length > 0);
-            if (_.isEmpty(arr)) {
-                setError("No data in the file.");
-                return;
-            }
-            setData(arr);
-        };
-        reader.readAsArrayBuffer(file);
-    }, []);
+        node.append("foreignObject")
+            .filter((d: any) => d.data.name !== "Tenant")
+            .attr("width", 18)
+            .attr("height", 18)
+            .attr("x", -5)
+            .attr("y", -25)
+            .style("z-index", 10)
+            .style("background", "#fff")
+            .style("border-radius", "20px")
+            .html(iconHtml);
 
-    const { getRootProps, getInputProps, open, isDragActive, isDragAccept } = useDropzone({
-        onDrop: imageOnDrop,
-        noDragEventsBubbling: true,
-        noClick: !_.isEmpty(data),
-        maxFiles: 1,
-    });
+        node.append("text")
+            .attr("dy", "0.31em")
+            .attr("x", 7)
+            .attr("text-anchor", "center")
+            .text((d) => (d.data.name?.length > 13 ? `${d.data.name.substring(0, 13)}...` : d.data.name))
+            .style("font-size", "12px")
+            .on("mouseover", function (e) {
+                setTooltipOpen(true);
+                setTitle(e.target.__data__.data.name);
+                d3.select(this?.parentElement?.childNodes[1] as Element)
+                    .style("stroke", green[500])
+                    .style("stroke-width", 2.5);
+            })
+            .on("mouseout", function () {
+                setTooltipOpen(false);
+                d3.select(this?.parentElement?.childNodes[1] as Element)
+                    .style("stroke", "#555")
+                    .style("stroke-width", 1.5);
+            })
+            .on("click", function (e) {
+                setDrawerOpen(true);
+                console.log("Node clicked:", e.target.__data__.data);
+            })
+            .clone(true)
+            .lower()
+            .attr("stroke", "white");
+    }, [data]);
 
     return (
-        <SnackbarProvider maxSnack={3}>
-            <Box sx={{ flexGrow: 1 }}>
-                <AppBar position="static">
-                    <Toolbar sx={{ background: teal[500] }}>
-                        <IconButton size="large" edge="start" color="inherit">
-                            <ChangeCircle fontSize="large" />
-                        </IconButton>
-                        <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: "bold" }}>
-                            Excel To String
-                        </Typography>
-                        <Tooltip title="Github" arrow>
-                            <a href="https://github.com/dohyun2im" target="_blank" rel="noopener noreferrer">
-                                <Avatar alt="dohyun" src="./favicon.ico" sx={{ mr: 0.42 }} />
-                            </a>
-                        </Tooltip>
-                    </Toolbar>
-                </AppBar>
-            </Box>
-            <Box sx={{ p: 2 }}>
-                {error && (
-                    <Alert severity="error" onClose={() => setError("")}>
-                        {error}
-                    </Alert>
-                )}
-            </Box>
-            <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                sx={{
-                    position: "relative",
-                    height: "80vh",
-                    border: "2px dashed #eee",
-                    mx: 2,
-                    p: !_.isEmpty(data) ? "20px" : undefined,
-                    borderRadius: "8px",
-                    overflow: "hidden",
-                }}>
-                <DropZoneContainer {...getRootProps({ className: "dropzone" })}>
-                    <input {...getInputProps()} />
-                    {!_.isEmpty(data) ? (
-                        <>
-                            <Box
-                                sx={{
-                                    width: "100%",
-                                    height: "100%",
-                                    overflow: "auto",
-                                    display: "flex",
-                                    flexDirection: "column",
-                                }}>
-                                <Typography fontWeight={600}>[</Typography>
-                                {data?.map((d: string[], i) => (
-                                    <Typography
-                                        key={i}
-                                        whiteSpace="nowrap"
-                                        fontWeight={600}
-                                        sx={{ mx: 4, letterSpacing: 1.5 }}>
-                                        {`[ ${d.join(", ")} ]`}
-                                    </Typography>
-                                ))}
-                                <Typography fontWeight={600}>]</Typography>
-                            </Box>
-                            <Tooltip title="Copy" arrow placement="top">
-                                <Box
-                                    sx={{
-                                        position: "absolute",
-                                        top: 10,
-                                        right: 100,
-                                    }}>
-                                    <CopyToClipboard
-                                        text={`[\n\t${data
-                                            .map((subArray, index, array) => {
-                                                const isLast = index === array.length - 1;
-                                                const subArrayStr = `[${subArray.join(", ").replace(/\n/g, "")}]`;
-                                                return isLast ? subArrayStr : subArrayStr + ",\n\t";
-                                            })
-                                            .join("")}\n]`}
-                                        onCopy={() =>
-                                            enqueueSnackbar("Copied on your clipboard", {
-                                                variant: "success",
-                                            })
-                                        }>
-                                        <IconButton
-                                            sx={{
-                                                background: "#fff",
-                                                opacity: 0.75,
-                                                "&:hover": { background: "#fff", opacity: 1 },
-                                                "@keyframes shake": {
-                                                    "0%": {
-                                                        transform: "translate(0, 0)",
-                                                    },
-                                                    "50%": {
-                                                        transform: "translate(0, -12px)",
-                                                    },
-                                                    "100%": {
-                                                        transform: "translate(0, 0)",
-                                                    },
-                                                },
-                                                animation: "shake 2s ease 3",
-                                            }}>
-                                            <CopyAll htmlColor={teal[500]} />
-                                        </IconButton>
-                                    </CopyToClipboard>
-                                </Box>
-                            </Tooltip>
-                            <Tooltip title="Upload" arrow placement="top">
-                                <IconButton
-                                    onClick={open}
-                                    sx={{
-                                        position: "absolute",
-                                        top: 10,
-                                        right: 55,
-                                        background: "#fff",
-                                        opacity: 0.75,
-                                        "&:hover": { background: "#fff", opacity: 1 },
-                                    }}>
-                                    <Upload />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Delete" arrow placement="top">
-                                <IconButton
-                                    onClick={() => setData([])}
-                                    sx={{
-                                        position: "absolute",
-                                        top: 10,
-                                        right: 10,
-                                        background: "#fff",
-                                        opacity: 0.75,
-                                        "&:hover": { background: "#fff", opacity: 1 },
-                                    }}>
-                                    <Delete htmlColor={red[500]} />
-                                </IconButton>
-                            </Tooltip>
-                        </>
-                    ) : isDragAccept ? (
-                        <Box
-                            display="flex"
-                            flexDirection="column"
-                            justifyContent="center"
-                            alignItems="center"
-                            sx={{
-                                width: "100%",
-                                height: "100%",
-                                background: "repeating-linear-gradient(50deg, #fff, #fff 30px, #eee 30px, #eee 60px)",
-                            }}
-                            {...getRootProps({ className: "dropzone" })}>
-                            <CloudDownloadTwoTone
-                                sx={{
-                                    color: "#5cb9fb",
-                                    width: 150,
-                                    height: 150,
-                                }}
-                            />
-
-                            <Typography
-                                variant="subtitle1"
-                                display="flex"
-                                alignItems="center"
-                                sx={{
-                                    padding: "6px 30px",
-                                    borderRadius: 1,
-                                    color: "#666",
-                                    backgroundColor: "#fff",
-                                    border: "2.5px dashed #5cb9fb",
-                                    opacity: 0.6,
-                                }}>
-                                <AddPhotoAlternateRounded sx={{ mr: 1, mb: 0.5 }} />
-                                Put the file in the zone !
-                            </Typography>
-                        </Box>
-                    ) : (
-                        !isDragAccept &&
-                        !isDragActive && (
-                            <Box
-                                display="flex"
-                                flexDirection="column"
-                                justifyContent="center"
-                                alignItems="center"
-                                sx={{
-                                    width: "100%",
-                                    height: "100%",
-                                    ":hover": {
-                                        transform: "scale(1.2)",
-                                    },
-                                }}>
-                                <Avatar sx={{ p: 5, mb: 2 }}>
-                                    <FileUploadRounded
-                                        sx={{
-                                            width: 100,
-                                            height: 100,
-                                        }}
-                                    />
-                                </Avatar>
-
-                                <Typography
-                                    variant="subtitle1"
-                                    display="flex"
-                                    alignItems="center"
-                                    sx={{
-                                        padding: "8px 16px",
-                                        borderRadius: 1,
-                                        color: "#666666",
-                                        backgroundColor: "#eee",
-                                        mx: 2,
-                                        display: "flex",
-                                        alignItems: "center",
-                                    }}>
-                                    <Mouse sx={{ fontSize: 16 }} />
-                                    Click or
-                                    <PanTool sx={{ fontSize: 16, ml: 0.5, mr: 0.5 }} />
-                                    drag & drop your file.
-                                </Typography>
-                            </Box>
-                        )
-                    )}
-                </DropZoneContainer>
-            </Box>
-        </SnackbarProvider>
+        <>
+            <Tooltip open={tooltipOpen} title={title} placement="top" arrow followCursor>
+                <Box
+                    sx={{
+                        width: "100%",
+                        height: "100%",
+                        overflow: "auto",
+                        display: "flex",
+                        alignItems: "center",
+                    }}>
+                    <svg ref={svgRef} />
+                </Box>
+            </Tooltip>
+            <SwipeableDrawer
+                anchor="right"
+                open={drawerOpen}
+                onClose={() => setDrawerOpen(false)}
+                onOpen={() => setDrawerOpen(true)}>
+                <Box minWidth={350} height="100%" role="presentation" onClick={() => setDrawerOpen(false)}>
+                    <Typography variant="h6" sx={{ mt: 2, ml: 2 }}>
+                        {title}
+                    </Typography>
+                    <Divider sx={{ my: 2 }} />
+                </Box>
+            </SwipeableDrawer>
+        </>
     );
 }
