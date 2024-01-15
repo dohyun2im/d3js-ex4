@@ -1,255 +1,497 @@
 "use client";
 
-import { HomeOutlined } from "@mui/icons-material";
-import { Box, Divider, SwipeableDrawer, Tooltip, Typography } from "@mui/material";
-import { green } from "@mui/material/colors";
-import * as d3 from "d3";
-import { useEffect, useRef, useState } from "react";
-import ReactDOMServer from "react-dom/server";
+import { scaleOrdinal } from "d3";
+import { SankeyGraph, sankey, sankeyJustify, sankeyLinkHorizontal } from "d3-sankey";
 
 const data = {
-    name: "Tenant",
-    children: [
+    nodes: [
         {
-            name: "Node 1",
-            children: [
-                { name: "Node 1-1" },
-                { name: "Node 1-2" },
-                {
-                    name: "Node 1-3",
-                    children: [
-                        { name: "Node 1-3-1" },
-                        { name: "Node 1-3-2" },
-                        {
-                            name: "Node 1-3-3",
-                            children: [
-                                { name: "Node 1-3-3-1" },
-                                { name: "Node 1-3-3-2" },
-                                {
-                                    name: "Node 1-3-3-3",
-                                    children: [
-                                        { name: "Node 1-3-3-3-1" },
-                                        { name: "Node 1-3-3-3-2" },
-                                        {
-                                            name: "Node 1-3-3-3-3",
-                                            children: [{ name: "Node 1-3-3-3-3-1" }, { name: "Node 1-3-3-3-3-2" }],
-                                        },
-                                    ],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
+            name: "농업 '폐기물'",
+            category: "농업",
         },
         {
-            name: "Node 2",
-            children: [
-                { name: "Node 2-1" },
-                { name: "Node 2-2" },
-                {
-                    name: "Node 2-3",
-                    children: [
-                        { name: "Node 2-3-1" },
-                        { name: "Node 2-3-2" },
-                        {
-                            name: "Node 2-3-3",
-                            children: [
-                                { name: "Node 2-3-3-1" },
-                                { name: "Node 2-3-3-2" },
-                                {
-                                    name: "Node 2-3-3-3",
-                                    children: [
-                                        { name: "Node 2-3-3-3-1" },
-                                        { name: "Node 2-3-3-3-2" },
-                                        {
-                                            name: "Node 2-3-3-3-3",
-                                            children: [{ name: "Node 2-3-3-3-3-1" }, { name: "Node 2-3-3-3-3-2" }],
-                                        },
-                                    ],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
+            name: "생물 변환",
+            category: "생물 변환",
         },
         {
-            name: "Node 3",
-            children: [{ name: "Node 3-1" }],
+            name: "액체",
+            category: "액체",
         },
         {
-            name: "Node 4",
+            name: "손실",
+            category: "손실",
         },
         {
-            name: "Node 5",
+            name: "고체",
+            category: "고체",
         },
         {
-            name: "Node 6",
+            name: "가스",
+            category: "가스",
         },
         {
-            name: "Node 7",
+            name: "생물 연료 수입",
+            category: "생물 연료",
         },
         {
-            name: "Node 8",
+            name: "바이오매스 수입",
+            category: "바이오매스",
         },
         {
-            name: "Node 9",
+            name: "석탄 수입",
+            category: "석탄",
+        },
+        {
+            name: "석탄",
+            category: "석탄",
+        },
+        {
+            name: "석탄 저장",
+            category: "석탄",
+        },
+        {
+            name: "지역 난방",
+            category: "지역",
+        },
+        {
+            name: "산업",
+            category: "산업",
+        },
+        {
+            name: "난방 및 냉방 - 상업",
+            category: "난방",
+        },
+        {
+            name: "난방 및 냉방 - 가정",
+            category: "난방",
+        },
+        {
+            name: "전기 그리드",
+            category: "전기",
+        },
+        {
+            name: "초과 생산 / 수출",
+            category: "초과",
+        },
+        {
+            name: "수소 변환",
+            category: "수소",
+        },
+        {
+            name: "도로 운송",
+            category: "도로",
+        },
+        {
+            name: "농업",
+            category: "농업",
+        },
+        {
+            name: "철도 운송",
+            category: "철도",
+        },
+        {
+            name: "조명 및 가전제품 - 상업",
+            category: "조명",
+        },
+        {
+            name: "조명 및 가전제품 - 가정",
+            category: "조명",
+        },
+        {
+            name: "가스 수입",
+            category: "가스",
+        },
+        {
+            name: "천연 가스",
+            category: "천연 가스",
+        },
+        {
+            name: "가스 저장",
+            category: "가스",
+        },
+        {
+            name: "열 발전",
+            category: "열",
+        },
+        {
+            name: "지열",
+            category: "지열",
+        },
+        {
+            name: "수소",
+            category: "수소",
+        },
+        {
+            name: "수력",
+            category: "수력",
+        },
+        {
+            name: "국제 해운",
+            category: "국제",
+        },
+        {
+            name: "국내 항공",
+            category: "국내",
+        },
+        {
+            name: "국제 항공",
+            category: "국제",
+        },
+        {
+            name: "국내 항해",
+            category: "국내",
+        },
+        {
+            name: "해양 바이오매스",
+            category: "해양",
+        },
+        {
+            name: "원자력",
+            category: "원자력",
+        },
+        {
+            name: "유류 수입",
+            category: "유류",
+        },
+        {
+            name: "유류",
+            category: "유류",
+        },
+        {
+            name: "유류 저장",
+            category: "유류",
+        },
+    ],
+    links: [
+        {
+            source: "농업 '폐기물'",
+            target: "생물 변환",
+            value: 124.729,
+        },
+        {
+            source: "생물 변환",
+            target: "액체",
+            value: 0.597,
+        },
+        {
+            source: "생물 변환",
+            target: "손실",
+            value: 26.862,
+        },
+        {
+            source: "생물 변환",
+            target: "고체",
+            value: 280.322,
+        },
+        {
+            source: "생물 변환",
+            target: "가스",
+            value: 81.144,
+        },
+        {
+            source: "생물 연료 수입",
+            target: "액체",
+            value: 35,
+        },
+        {
+            source: "바이오매스 수입",
+            target: "고체",
+            value: 35,
+        },
+        {
+            source: "석탄 수입",
+            target: "석탄",
+            value: 11.606,
+        },
+        {
+            source: "석탄 저장",
+            target: "석탄",
+            value: 63.965,
+        },
+        {
+            source: "석탄",
+            target: "고체",
+            value: 75.571,
+        },
+        {
+            source: "지역 난방",
+            target: "산업",
+            value: 10.639,
+        },
+        {
+            source: "지역 난방",
+            target: "난방 및 냉방 - 상업",
+            value: 22.505,
+        },
+        {
+            source: "지역 난방",
+            target: "난방 및 냉방 - 가정",
+            value: 46.184,
+        },
+        {
+            source: "전기 그리드",
+            target: "초과 생산 / 수출",
+            value: 104.453,
+        },
+        {
+            source: "전기 그리드",
+            target: "난방 및 냉방 - 가정",
+            value: 113.726,
+        },
+        {
+            source: "전기 그리드",
+            target: "수소 변환",
+            value: 27.14,
+        },
+        {
+            source: "전기 그리드",
+            target: "산업",
+            value: 342.165,
+        },
+        {
+            source: "전기 그리드",
+            target: "도로 운송",
+            value: 37.797,
+        },
+        {
+            source: "전기 그리드",
+            target: "농업",
+            value: 4.412,
+        },
+        {
+            source: "전기 그리드",
+            target: "난방 및 냉방 - 상업",
+            value: 40.858,
+        },
+        {
+            source: "전기 그리드",
+            target: "손실",
+            value: 56.691,
+        },
+        {
+            source: "전기 그리드",
+            target: "철도 운송",
+            value: 7.863,
+        },
+        {
+            source: "전기 그리드",
+            target: "조명 및 가전제품 - 상업",
+            value: 90.008,
+        },
+        {
+            source: "전기 그리드",
+            target: "조명 및 가전제품 - 가정",
+            value: 93.494,
+        },
+        {
+            source: "가스 수입",
+            target: "천연 가스",
+            value: 40.719,
+        },
+        {
+            source: "가스 저장",
+            target: "천연 가스",
+            value: 82.233,
+        },
+        {
+            source: "가스",
+            target: "난방 및 냉방 - 상업",
+            value: 0.129,
+        },
+        {
+            source: "가스",
+            target: "손실",
+            value: 1.401,
+        },
+        {
+            source: "가스",
+            target: "열 발전",
+            value: 151.891,
+        },
+        {
+            source: "가스",
+            target: "농업",
+            value: 2.096,
+        },
+        {
+            source: "가스",
+            target: "산업",
+            value: 48.58,
+        },
+        {
+            source: "지열",
+            target: "전기 그리드",
+            value: 7.013,
+        },
+        {
+            source: "수소 변환",
+            target: "수소",
+            value: 20.897,
+        },
+        {
+            source: "수소 변환",
+            target: "손실",
+            value: 6.242,
+        },
+        {
+            source: "수소",
+            target: "도로 운송",
+            value: 20.897,
+        },
+        {
+            source: "수력",
+            target: "전기 그리드",
+            value: 6.995,
+        },
+        {
+            source: "액체",
+            target: "산업",
+            value: 121.066,
+        },
+        {
+            source: "액체",
+            target: "국제 해운",
+            value: 128.69,
+        },
+        {
+            source: "액체",
+            target: "도로 운송",
+            value: 135.835,
+        },
+        {
+            source: "액체",
+            target: "국내 항공",
+            value: 14.458,
+        },
+        {
+            source: "액체",
+            target: "국제 항공",
+            value: 206.267,
+        },
+        {
+            source: "액체",
+            target: "농업",
+            value: 3.64,
+        },
+        {
+            source: "액체",
+            target: "국내 항해",
+            value: 33.218,
+        },
+        {
+            source: "액체",
+            target: "철도 운송",
+            value: 4.413,
+        },
+        {
+            source: "해양 바이오매스",
+            target: "생물 변환",
+            value: 4.375,
+        },
+        {
+            source: "천연 가스",
+            target: "가스",
+            value: 122.952,
+        },
+        {
+            source: "원자력",
+            target: "열 발전",
+            value: 839.978,
+        },
+        {
+            source: "유류 수입",
+            target: "유류",
+            value: 504.287,
+        },
+        {
+            source: "유류 저장",
+            target: "유류",
+            value: 107.703,
+        },
+        {
+            source: "유류",
+            target: "액체",
+            value: 611.99,
         },
     ],
 };
 
+const MARGIN_Y = 25;
+const MARGIN_X = 5;
+const width = 800;
+const height = 600;
+const COLORS = ["#e0ac2b", "#e85252", "#6689c6", "#9a6fb0", "#a53253"];
+
 export default function Home() {
-    const svgRef = useRef<SVGSVGElement | null>(null);
-    const [tooltipOpen, setTooltipOpen] = useState<boolean>(false);
-    const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
-    const [title, setTitle] = useState<string>("");
+    const allGroups = Array.from(new Set(data.nodes.map((d) => d.category))).sort();
+    const colorScale = scaleOrdinal<string>().domain(allGroups).range(COLORS);
 
-    useEffect(() => {
-        const width = 1350;
+    const sankeyGenerator = sankey()
+        .nodeWidth(26)
+        .nodePadding(10)
+        .extent([
+            [MARGIN_X, MARGIN_Y],
+            [width - MARGIN_X, height - MARGIN_Y],
+        ])
+        .nodeId((node: any) => node?.name)
+        .nodeAlign(sankeyJustify);
 
-        const root = d3.hierarchy(data);
-        const dx = 50;
-        const dy = width / (root.height + 1);
+    const { nodes, links } = sankeyGenerator(data as SankeyGraph<{}, {}>);
 
-        const tree = d3.tree().nodeSize([dx, dy]);
-        root.sort((a, b) => d3.ascending(a.data.name, b.data.name));
-        tree(root as any);
+    const allNodes = nodes.map((node: any) => {
+        return (
+            <g key={node.index}>
+                <rect
+                    height={node.y1 - node.y0}
+                    width={sankeyGenerator.nodeWidth()}
+                    x={node.x0}
+                    y={node.y0}
+                    stroke={"black"}
+                    fill={colorScale(node.category)}
+                    fillOpacity={1}
+                    rx={0.9}
+                />
+            </g>
+        );
+    });
 
-        let x0 = Infinity;
-        let x1 = -x0;
-        root.each((d: any) => {
-            if (d.x > x1) x1 = d.x;
-            if (d.x < x0) x0 = d.x;
-        });
+    const allLinks = links.map((link: any, i) => {
+        const linkGenerator = sankeyLinkHorizontal();
+        const path = linkGenerator(link);
 
-        const height = x1 - x0 + dx * 2;
+        return (
+            <path
+                key={i}
+                d={path as string}
+                stroke={colorScale(link.source.category)}
+                fill="none"
+                strokeOpacity={0.3}
+                strokeWidth={link.width}
+            />
+        );
+    });
 
-        const svg = d3
-            .select(svgRef.current)
-            .attr("width", width)
-            .attr("height", height)
-            .attr("viewBox", [-dy / 3, x0 - dx, width, height])
-            .attr("style", "min-width: 1400px; max-width: 100%; height: auto; font: 10px sans-serif;");
-
-        svg.append("g")
-            .attr("fill", "none")
-            .attr("stroke", "#555")
-            .attr("stroke-opacity", 0.4)
-            .attr("stroke-width", 1.5)
-            .selectAll()
-            .data(root.links())
-            .join("path")
-            .attr(
-                "d",
-                (d3 as any)
-                    .linkHorizontal()
-                    .x((d: any) => d.y)
-                    .y((d: any) => d.x)
-            );
-
-        const node = svg
-            .append("g")
-            .attr("stroke-linejoin", "round")
-            .attr("stroke-width", 3)
-            .selectAll()
-            .data(root.descendants())
-            .join("g")
-            .attr("transform", (d: any) => `translate(${d.y},${d.x})`);
-
-        const iconHtml = ReactDOMServer.renderToString(<HomeOutlined />);
-
-        node.append("rect")
-            .filter((d: any) => d.data.name !== "Tenant")
-            .attr("width", 100)
-            .attr("height", 30)
-            .attr("x", 0)
-            .attr("y", -15)
-            .attr("rx", 5)
-            .attr("ry", 5)
-            .style("fill", "white")
-            .style("stroke", "#555")
-            .style("stroke-width", 1.5)
-            .style("z-index", 10)
-            .on("mouseover", function (e) {
-                setTooltipOpen(true);
-                setTitle(e.target.__data__.data.name);
-                d3.select(this).style("stroke", green[500]).style("stroke-width", 3);
-            })
-            .on("mouseout", function () {
-                setTooltipOpen(false);
-                d3.select(this).style("stroke", "#555").style("stroke-width", 1.5);
-            })
-            .on("click", function (e) {
-                setDrawerOpen(true);
-                console.log("Node clicked:", e.target.__data__.data);
-            });
-
-        node.append("foreignObject")
-            .filter((d: any) => d.data.name !== "Tenant")
-            .attr("width", 18)
-            .attr("height", 18)
-            .attr("x", -5)
-            .attr("y", -25)
-            .style("z-index", 10)
-            .style("background", "#fff")
-            .style("border-radius", "20px")
-            .html(iconHtml);
-
-        node.append("text")
-            .attr("dy", "0.31em")
-            .attr("x", 7)
-            .attr("text-anchor", "center")
-            .text((d) => (d.data.name?.length > 13 ? `${d.data.name.substring(0, 13)}...` : d.data.name))
-            .style("font-size", "12px")
-            .on("mouseover", function (e) {
-                setTooltipOpen(true);
-                setTitle(e.target.__data__.data.name);
-                d3.select(this?.parentElement?.childNodes[1] as Element)
-                    .style("stroke", green[500])
-                    .style("stroke-width", 2.5);
-            })
-            .on("mouseout", function () {
-                setTooltipOpen(false);
-                d3.select(this?.parentElement?.childNodes[1] as Element)
-                    .style("stroke", "#555")
-                    .style("stroke-width", 1.5);
-            })
-            .on("click", function (e) {
-                setDrawerOpen(true);
-                console.log("Node clicked:", e.target.__data__.data);
-            })
-            .clone(true)
-            .lower()
-            .attr("stroke", "white");
-    }, [data]);
+    const allLabels = nodes.map((node: any, i) => {
+        return (
+            <text
+                key={i}
+                x={node.x0 < width / 2 ? node.x1 + 6 : node.x0 - 6}
+                y={(node.y1 + node.y0) / 2}
+                dy="0.35rem"
+                textAnchor={node.x0 < width / 2 ? "start" : "end"}
+                fontSize={12}>
+                {node.name}
+            </text>
+        );
+    });
 
     return (
-        <>
-            <Tooltip open={tooltipOpen} title={title} placement="top" arrow followCursor>
-                <Box
-                    sx={{
-                        width: "100%",
-                        height: "100%",
-                        overflow: "auto",
-                        display: "flex",
-                        alignItems: "center",
-                    }}>
-                    <svg ref={svgRef} />
-                </Box>
-            </Tooltip>
-            <SwipeableDrawer
-                anchor="right"
-                open={drawerOpen}
-                onClose={() => setDrawerOpen(false)}
-                onOpen={() => setDrawerOpen(true)}>
-                <Box minWidth={350} height="100%" role="presentation" onClick={() => setDrawerOpen(false)}>
-                    <Typography variant="h6" sx={{ mt: 2, ml: 2 }}>
-                        {title}
-                    </Typography>
-                    <Divider sx={{ my: 2 }} />
-                </Box>
-            </SwipeableDrawer>
-        </>
+        <div style={{ border: "2px dashed #000", borderRadius: 4, margin: 20, padding: 20, width: 800 }}>
+            <svg width={width} height={height}>
+                {allLinks}
+                {allNodes}
+                {allLabels}
+            </svg>
+        </div>
     );
 }
